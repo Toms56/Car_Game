@@ -16,7 +16,8 @@ public class SimpleCarController : MonoBehaviour
 
     public float maxSteerAngle = 30;
     public float motorForce = 50; // Allow to modify the motorTorque (couple) on WheelCollider
-
+    public float maxBreakTorque = 150f;
+    public bool isBraking = false;
 
     void Update()
     {
@@ -26,8 +27,15 @@ public class SimpleCarController : MonoBehaviour
     {
         horizontalInput = Input.GetAxis("Horizontal");
         verticalInput = Input.GetAxis("Vertical");
-        Debug.Log(horizontalInput);
-        Debug.Log(verticalInput);
+        /*Debug.Log(horizontalInput);
+        Debug.Log(verticalInput);*/
+        if (verticalInput < 0 && frontLeftW.motorTorque > 0)
+        {
+            isBraking = true;
+        }else if (verticalInput < 0 && frontLeftW.motorTorque <= 0)
+        {
+            isBraking = false;
+        }
 
     }
 
@@ -44,9 +52,27 @@ public class SimpleCarController : MonoBehaviour
         //I can also apply acceleration to rear wheels or to all wheels
 
         //VerticalInput because the wheel is vertical and going forward
-        frontLeftW.motorTorque = verticalInput * motorForce;
-        frontRightW.motorTorque = verticalInput * motorForce;
+        if (!isBraking)
+        {
+            leftRearW.brakeTorque = 0;
+            rightRearW.brakeTorque = 0;
+            frontLeftW.motorTorque = verticalInput * motorForce;
+            frontRightW.motorTorque = verticalInput * motorForce;
+        }
+    }
 
+    private void Braking()
+    {
+        if (isBraking)
+        {
+            leftRearW.brakeTorque = maxBreakTorque;
+            rightRearW.brakeTorque = maxBreakTorque;
+        }
+        else
+        {
+            leftRearW.brakeTorque = 0;
+            rightRearW.brakeTorque = 0;
+        }
     }
 
     private void UpdateWheelPoses()
@@ -70,9 +96,17 @@ public class SimpleCarController : MonoBehaviour
 
     private void FixedUpdate()//Run zero, once or several times per frame
     {
+        Debug.Log(frontLeftW.motorTorque);
         GetInput();
         Steer();
-        Accelerate();
+        
+        if (isBraking)
+        {
+            Braking();  
+        }else if (!isBraking)
+        {
+            Accelerate();
+        }
         UpdateWheelPoses();
     }
 }
