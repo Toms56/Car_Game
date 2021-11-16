@@ -21,7 +21,7 @@ public class SimpleCarController : MonoBehaviour
 
     void Update()
     {
-        Debug.Log(frontLeftT.position);
+        
     }
     public void GetInput()
     {
@@ -29,14 +29,6 @@ public class SimpleCarController : MonoBehaviour
         verticalInput = Input.GetAxis("Vertical");
         /*Debug.Log(horizontalInput);
         Debug.Log(verticalInput);*/
-        if (verticalInput < 0 && frontLeftW.motorTorque > 0)
-        {
-            isBraking = true;
-        }else if (verticalInput < 0 && frontLeftW.motorTorque <= 0)
-        {
-            isBraking = false;
-        }
-
     }
 
     private void Steer()
@@ -100,6 +92,14 @@ public class SimpleCarController : MonoBehaviour
         GetInput();
         Steer();
         
+        if(Input.GetKey(KeyCode.S) && frontLeftW.motorTorque >0)
+        {
+            isBraking = true;
+        }
+        else
+        {
+            isBraking = false;
+        }
         if (isBraking)
         {
             Braking();  
